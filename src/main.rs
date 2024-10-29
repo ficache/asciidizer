@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use colored::Colorize;
 use termsize::Size;
 
@@ -18,18 +20,26 @@ impl Field {
     }
 
     fn render(&self) {
-        for curr_row in 0..self.size.rows {
-            for curr_col in 0..self.size.cols {
-                for object in &self.objects {
-                    if ((object.position.0 == curr_row) && (object.position.1 == curr_col)) {
-                        object.draw();
-                    } else {
-                        print!("{}", "&".bright_black());
-                    }
-                }
-            }
-            println!();
+        /*
+         * Better aproach will be possible if:
+         * 1. Program will create array with size of field.
+         * 2. Reduse amount of for loops lol.
+         */
+        let cols = self.size.cols as usize;
+        let rows = self.size.rows as usize;
+        let mut render_size: Vec<Vec<char>> = vec![vec!['-'; cols]; rows];
+        let mut rendered: String = Default::default();
+        for object in &self.objects {
+            render_size[object.position.0][object.position.1] = object.draw();
         }
+        for row in 0..rows {
+            for col in 0..cols {
+                //print!("{}", render_size[row][col]);
+                rendered.push(render_size[row][col]);
+            }
+            rendered.push('\n');
+        }
+        println!("{}", rendered);
     }
 
     fn resize(&mut self) {
@@ -40,12 +50,12 @@ impl Field {
 
 struct Object {
     name: String,
-    position: (u16, u16),
+    position: (usize, usize),
 }
 
 impl Drawable for Object {
-    fn draw(&self) {
-        print!("0");
+    fn draw(&self) -> char {
+        '0'
     }
 }
 
@@ -67,14 +77,14 @@ impl Sprite {
 }
 
 trait Drawable {
-    fn draw(&self);
+    fn draw(&self) -> char;
 }
 
 fn main() {
     println!("Hello, world!");
     let test = Object {
         name: "test".to_string(),
-        position: (10, 10),
+        position: (5, 30),
     };
     let mut vector_objects = Vec::new();
     vector_objects.push(test);
